@@ -1,0 +1,127 @@
+{% extends 'checker/layout.html' %} {% load static %} {%block body%}
+
+<div class="container">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="{%url 'form'%}">
+      <img src="{% static "checker/media/logo.png" %}" width="30" height="30"
+      class="d-inline-block align-top" alt="logo"> Home
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarText"
+      aria-controls="navbarText"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{%url 'allConditions'%}">All Conditions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Login</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="addSym">
+    <input
+      list="symptoms"
+      name="symptomList"
+      class="form-control-lg"
+      id="symptom"
+      placeholder="Choose symptoms..."
+    />
+
+    <datalist id="symptoms">
+      {%for symptom in allSymptoms %}
+      <option value="{{symptom}}">{{symptom}}</option>
+      {%endfor%}
+    </datalist>
+
+    <button id="add" class="btn btn-primary btn-lg" onclick="addSymptom()">
+      Add to symptoms
+    </button>
+  </div>
+
+  <div id="patientDiv">
+    <ul id="patientSymptoms"></ul>
+  </div>
+
+  <div id="sendSym">
+    <form action="{% url 'results' %}" method="post">
+      {% csrf_token %}
+
+      <div id="ageDiv">
+        <p>Age</p>
+        <input type="number" id="age" name="age" min="0" max="200" required />
+      </div>
+
+      <div id="genderDiv">
+        <p>Gender</p>
+        <input type="radio" id="male" name="gender" value="Male" required />  
+        <label for="male">Male</label>  
+        <input type="radio" id="female" name="gender" value="Female" required />
+         
+        <label for="female">Female</label>
+      </div>
+
+      <input type="hidden" name="symptomSet" id="symptomInput" />
+      <input type="submit" class="btn btn-success" id="submitButton" disabled />
+    </form>
+  </div>
+</div>
+
+<script>
+  var patientSymptoms = new Set();
+  var symptomUl = document.getElementById("patientSymptoms");
+
+  //Get all symptoms
+  var symptomSet = new Set();
+  var datalistOptions = document.getElementById("symptoms").childNodes;
+  datalistOptions.forEach((option) => {
+    symptomSet.add(option.innerText);
+  });
+
+  function addSymptom() {
+    newSymptom = document.getElementById("symptom").value;
+    if (newSymptom === "") {
+      alert("You must write something!");
+    } else {
+      //Check if the inputed symptom exists:
+      if (symptomSet.has(newSymptom)) {
+        patientSymptoms.add(newSymptom);
+        document.getElementById("submitButton").disabled = false; //Enable submit
+        document.getElementById("addSym").style.marginTop = "10%"; //reduce top margin of search
+        document.getElementById("submitButton").style.display = "block";
+
+        //Add the new symptom to the list that will be sent to the server
+        if (
+          !document.getElementById("symptomInput").value.includes(newSymptom)
+        ) {
+          document.getElementById("symptomInput").value += "," + newSymptom;
+          console.log(document.getElementById("symptomInput").value);
+        }
+      } else {
+        alert("Please select one of the available symptoms");
+      }
+    }
+    document.getElementById("symptom").value = "";
+
+    //Clear the ul and update it
+    symptomUl.innerHTML = "";
+    for (symptom of patientSymptoms) {
+      var li = document.createElement("li");
+      li.setAttribute("class", "list-group-item list-group-item-secondary");
+      var t = document.createTextNode(symptom);
+      li.appendChild(t);
+      symptomUl.appendChild(li);
+    }
+  }
+</script>
+{% endblock %}

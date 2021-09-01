@@ -1,0 +1,103 @@
+{% extends 'checker/layout.html' %} {% load static %}{%block body%}
+
+<div class="container">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="{%url 'form'%}">
+      <img src="{% static "checker/media/logo.png" %}" width="30" height="30"
+      class="d-inline-block align-top" alt="logo"> Home
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarText"
+      aria-controls="navbarText"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{%url 'allConditions'%}">All Conditions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Login</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <h1>Conditions that match your symptoms</h1>
+
+  <div id="missingDiv">
+    {%if missing%}
+    <h4>Similar conditions have these symptoms:</h4>
+    <ul>
+    {%for symList in missing%}
+      {%for sym in symList%}
+      <li>{{sym}}</li>
+      {% endfor %}
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  {%if probable %}
+    <div id="probableDiv">
+      <h2>Most Probable</h2>
+      <ul id="probableList">
+        {%for cond in probable%}
+        <li><a href={%url 'details' cond.0.id%}>{{cond.0}}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div id="mySymptoms">
+    <h2>My Symptoms</h2>
+    <ul>
+      {%for symp in symptoms%}
+        <li class="list-group-item list-group-item-secondary">{{symp}}</li>
+      {% endfor %}
+      <li class="list-group-item list-group-item-dark">Age: {{age}}</li>
+      <li class="list-group-item list-group-item-dark">Gender: {{gender}}</li>
+    </ul>
+  </div>
+
+  <div id="possibleDiv">
+    <div id="possibleList">
+      <h2>Possible Conditions</h2>
+      <ul>
+        {%for condition in lowAccuracy%}
+        <li><a href={%url 'details' condition.id%}>{{condition}}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <button id="hidePossible" onclick="toggle()" class="btn btn-secondary">Hide possible conditions</button>
+  </div>
+
+</div>
+
+<script>
+
+  //If there are no probable, the possible display automatically
+  if (document.getElementById('probableList')){
+    document.getElementById('possibleList').style.display = "none";
+    document.getElementById('hidePossible').innerHTML = "Show all possible conditions"
+  }
+  
+  function toggle(){
+    var possibleList = document.getElementById('possibleList')
+    if (possibleList.style.display === "none") {
+      possibleList.style.display = "block";
+      document.getElementById('hidePossible').innerHTML = "Hide possible conditions"
+    } else {
+      possibleList.style.display = "none";
+      document.getElementById('hidePossible').innerHTML = "Show all possible conditions"
+    }
+  }
+</script>
+
+{% endblock %}
