@@ -13,10 +13,13 @@ def allConditions(request):
 
 def conditionDetails(request, condition_id):
     condition = Condition.objects.get(pk=condition_id)
-    symptoms = condition.main.all() | condition.secondary.all()
+    symptomQuery = condition.main.all() | condition.secondary.all()
+    allSymptoms = set()
+    for symp in symptomQuery:
+        allSymptoms.add(symp)
     return render(request, "checker/details.html", {
         "condition" : condition,
-        "conditionSymptoms": symptoms
+        "conditionSymptoms": allSymptoms
     })
 
 def symptomForm(request):
